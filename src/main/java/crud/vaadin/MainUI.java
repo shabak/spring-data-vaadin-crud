@@ -69,7 +69,7 @@ public class MainUI extends UI {
         grid.getColumn(ID).setHeaderCaption("ID");
         grid.getColumn(NAME).setHeaderCaption("Name");
         grid.getColumn(EMAIL).setHeaderCaption("Email");
-        grid.getColumn(BIRTHDAY_PHONE).setHeaderCaption("Details").setRenderer(new HtmlRenderer());
+        grid.getColumn(BIRTHDAY_PHONE).setHeaderCaption("Details");
 
         grid.addSelectionListener( event -> onSelectionChanged() );
         grid.setSizeFull();
