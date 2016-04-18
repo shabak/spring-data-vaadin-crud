@@ -66,9 +66,6 @@ public class MainUI extends UI {
         container.addGeneratedProperty(BIRTHDAY_PHONE, birthdayPhoneGenerator);
         grid.setContainerDataSource(container);
 
-        grid.getColumn(ID).setHeaderCaption("ID");
-        grid.getColumn(NAME).setHeaderCaption("Name");
-        grid.getColumn(EMAIL).setHeaderCaption("Email");
         grid.getColumn(BIRTHDAY_PHONE).setHeaderCaption("Details");
 
         grid.addSelectionListener( event -> onSelectionChanged() );
