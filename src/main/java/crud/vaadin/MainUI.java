@@ -22,9 +22,6 @@ import org.vaadin.viritin.label.RichText;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
-/**
- *
- */
 @Title("PhoneBook CRUD example")
 @Theme("valo")
 @SpringUI
