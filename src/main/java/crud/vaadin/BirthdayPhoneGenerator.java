@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2016, i-Free. All Rights Reserved.
- * Use is subject to license terms.
- */
-
 package crud.vaadin;
 
 import com.vaadin.data.Item;
