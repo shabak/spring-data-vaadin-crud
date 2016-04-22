@@ -8,7 +8,6 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.renderers.HtmlRenderer;
 import crud.backend.Person;
 import crud.backend.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,22 +34,17 @@ public class MainUI extends UI {
     @Autowired
     PersonRepository repo;
 
-    private static final String ID = "id";
-    private static final String NAME = "name";
-    private static final String EMAIL = "email";
-    private static final String BIRTHDAY = "birthDay";
-    private static final String PHONE = "phone";
-    private static final String BIRTHDAY_PHONE = "birthday_phone";
-    String[] columns = {ID, NAME, EMAIL, BIRTHDAY_PHONE};
+    private MGrid<Person> fashionableApiGrid = new MGrid<>(Person.class)
+            .withGeneratedColumn("details", new DetailsGenerator())
+            .withProperties("id", "name", "email", "details")
+            .withFullWidth();
 
-    private MGrid<Person> grid = new MGrid<>();
+    private MGrid<Person> legacyApiGrid = new MGrid<>();
 
     private Button addNew = new MButton(FontAwesome.PLUS, this::add);
     private Button edit = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
     private Button delete = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete the entry?", this::remove);
-
-    private BirthdayPhoneGenerator birthdayPhoneGenerator = new BirthdayPhoneGenerator();
 
     @Override
     protected void init(VaadinRequest request) {
@@ -58,26 +52,24 @@ public class MainUI extends UI {
                 new MVerticalLayout(
                         new RichText().withMarkDownResource("/welcome.md"),
                         new MHorizontalLayout(addNew, edit, delete),
-                        grid
-                ).expand(grid)
+                        fashionableApiGrid,
+                        legacyApiGrid
+                )
         );
 
-        GeneratedPropertyListContainer<Person> container = new GeneratedPropertyListContainer(Person.class, columns);
-        container.addGeneratedProperty(BIRTHDAY_PHONE, birthdayPhoneGenerator);
-        grid.setContainerDataSource(container);
+        GeneratedPropertyListContainer<Person> container = new
+                GeneratedPropertyListContainer(Person.class, "id", "name", "email", "details");
+        container.addGeneratedProperty("details", new DetailsGenerator());
+        legacyApiGrid.setContainerDataSource(container);
+        legacyApiGrid.getColumn("details").setHeaderCaption("Details");
+        legacyApiGrid.setSizeFull();
 
-        grid.getColumn(ID).setHeaderCaption("ID");
-        grid.getColumn(NAME).setHeaderCaption("Name");
-        grid.getColumn(EMAIL).setHeaderCaption("Email");
-        grid.getColumn(BIRTHDAY_PHONE).setHeaderCaption("Details").setRenderer(new HtmlRenderer());
-
-        grid.addSelectionListener( event -> onSelectionChanged() );
-        grid.setSizeFull();
         listEntities();
+        fashionableApiGrid.addSelectionListener(event -> onSelectionChanged() );
     }
 
     private void onSelectionChanged() {
-        boolean oneRowSelected = grid.getSelectedRows().size() == 1;
+        boolean oneRowSelected = fashionableApiGrid.getSelectedRows().size() == 1;
         edit.setEnabled(oneRowSelected);
         delete.setEnabled(oneRowSelected);
     }
@@ -85,11 +77,26 @@ public class MainUI extends UI {
     static final int PAGESIZE = 45;
 
     private void listEntities() {
-        grid.lazyLoadFrom(
+        fashionableApiGrid.lazyLoadFrom(
                 // entity fetching strategy
                 (firstRow, asc, sortProperty) -> repo.findAllBy(
                         new PageRequest(
                                 firstRow / PAGESIZE, 
+                                PAGESIZE,
+                                asc ? Sort.Direction.ASC : Sort.Direction.DESC,
+                                // fall back to id as "natural order"
+                                sortProperty == null ? "id" : sortProperty
+                        )
+                ),
+                // count fetching strategy
+                () -> (int) repo.count(),
+                PAGESIZE
+        );
+        legacyApiGrid.lazyLoadFrom(
+                // entity fetching strategy
+                (firstRow, asc, sortProperty) -> repo.findAllBy(
+                        new PageRequest(
+                                firstRow / PAGESIZE,
                                 PAGESIZE,
                                 asc ? Sort.Direction.ASC : Sort.Direction.DESC,
                                 // fall back to id as "natural order"
@@ -109,11 +116,11 @@ public class MainUI extends UI {
     }
 
     public void edit(ClickEvent e) {
-        edit(grid.getSelectedRow());
+        edit(fashionableApiGrid.getSelectedRow());
     }
 
     public void remove(ClickEvent e) {
-        repo.delete(grid.getSelectedRow());
+        repo.delete(fashionableApiGrid.getSelectedRow());
         listEntities();
     }
 

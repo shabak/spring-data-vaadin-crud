@@ -18,7 +18,7 @@ import java.util.Date;
  * @author Nikolay Shabak (nikolay)
  * @since 12.04.2016
  */
-public class BirthdayPhoneGenerator extends PropertyValueGenerator<String> {
+public class DetailsGenerator extends PropertyValueGenerator<String> {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
     @Override
