@@ -13,13 +13,17 @@ import crud.backend.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.vaadin.viritin.GeneratedPropertyListContainer;
+import org.vaadin.viritin.LazyList;
+import org.vaadin.viritin.grid.GeneratedPropertyListContainer;
 import org.vaadin.viritin.button.ConfirmButton;
 import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.grid.MGrid;
 import org.vaadin.viritin.label.RichText;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -36,7 +40,8 @@ public class MainUI extends UI {
 
     private MGrid<Person> fashionableApiGrid = new MGrid<>(Person.class)
             .withGeneratedColumn("details", new DetailsGenerator())
-            .withProperties("id", "name", "email", "details")
+            .withGeneratedColumn("zodiac", String.class, person -> Zodiac.is(person.getBirthDay()))
+            .withProperties("id", "name", "email", "zodiac", "details")
             .withFullWidth();
 
     private MGrid<Person> legacyApiGrid = new MGrid<>();
@@ -58,8 +63,9 @@ public class MainUI extends UI {
         );
 
         GeneratedPropertyListContainer<Person> container = new
-                GeneratedPropertyListContainer(Person.class, "id", "name", "email", "details");
+                GeneratedPropertyListContainer(Person.class, "id", "name", "email", "zodiac", "details");
         container.addGeneratedProperty("details", new DetailsGenerator());
+        container.addGeneratedProperty("zodiac", String.class, person -> Zodiac.is(person.getBirthDay()));
         legacyApiGrid.setContainerDataSource(container);
         legacyApiGrid.getColumn("details").setHeaderCaption("Details");
         legacyApiGrid.setSizeFull();
@@ -146,4 +152,44 @@ public class MainUI extends UI {
         getWindows().stream().forEach(w -> removeWindow(w));
     }
 
+    public static class Zodiac {
+
+        private static SimpleDateFormat month = new SimpleDateFormat("MM");
+        private static SimpleDateFormat day = new SimpleDateFormat("dd");
+
+        public static String is(Date date) {
+            if (date == null)
+                return "";
+            int M = Integer.parseInt(month.format(date));
+            int D = Integer.parseInt(day.format(date));
+            if ((M == 12 && D >= 22 && D <= 31) || (M ==  1 && D >= 1 && D <= 19))
+                return "Capricorn";
+            else if ((M ==  1 && D >= 20 && D <= 31) || (M ==  2 && D >= 1 && D <= 17))
+                return "Aquarius";
+            else if ((M ==  2 && D >= 18 && D <= 29) || (M ==  3 && D >= 1 && D <= 19))
+                return "Pisces";
+            else if ((M ==  3 && D >= 20 && D <= 31) || (M ==  4 && D >= 1 && D <= 19))
+                return "Aries";
+            else if ((M ==  4 && D >= 20 && D <= 30) || (M ==  5 && D >= 1 && D <= 20))
+                return "Taurus";
+            else if ((M ==  5 && D >= 21 && D <= 31) || (M ==  6 && D >= 1 && D <= 20))
+                return "Gemini";
+            else if ((M ==  6 && D >= 21 && D <= 30) || (M ==  7 && D >= 1 && D <= 22))
+                return "Cancer";
+            else if ((M ==  7 && D >= 23 && D <= 31) || (M ==  8 && D >= 1 && D <= 22))
+                return "Leo";
+            else if ((M ==  8 && D >= 23 && D <= 31) || (M ==  9 && D >= 1 && D <= 22))
+                return "Virgo";
+            else if ((M ==  9 && D >= 23 && D <= 30) || (M == 10 && D >= 1 && D <= 22))
+                return "Libra";
+            else if ((M == 10 && D >= 23 && D <= 31) || (M == 11 && D >= 1 && D <= 21))
+                return "Scorpio";
+            else if ((M == 11 && D >= 22 && D <= 30) || (M == 12 && D >= 1 && D <= 21))
+                return "Sagittarius";
+            else
+                return "";
+
+        }
+
+    }
 }
