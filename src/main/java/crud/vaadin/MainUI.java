@@ -23,6 +23,9 @@ import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 /**
@@ -39,9 +42,17 @@ public class MainUI extends UI {
     PersonRepository repo;
 
     private MGrid<Person> fashionableApiGrid = new MGrid<>(Person.class)
+            .withGeneratedColumn("zodiac", person -> Zodiac.is(person.getBirthDay()))
+            .withGeneratedColumn("age", Long.class,
+                    p -> p.getBirthDay() != null ?
+                        p.getBirthDay()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate().
+                            until(LocalDate.now(), ChronoUnit.YEARS)
+                        : 0)
             .withGeneratedColumn("details", new DetailsGenerator())
-            .withGeneratedColumn("zodiac", String.class, person -> Zodiac.is(person.getBirthDay()))
-            .withProperties("id", "name", "email", "zodiac", "details")
+            .withProperties("id", "name", "email", "zodiac", "age", "details")
             .withFullWidth();
 
     private MGrid<Person> legacyApiGrid = new MGrid<>();
@@ -64,8 +75,16 @@ public class MainUI extends UI {
 
         GeneratedPropertyListContainer<Person> container = new
                 GeneratedPropertyListContainer(Person.class, "id", "name", "email", "zodiac", "details");
+        container.addGeneratedProperty("zodiac", person -> Zodiac.is(person.getBirthDay()));
+        container.addGeneratedProperty("age", Long.class,
+                p -> p.getBirthDay() != null ?
+                        p.getBirthDay()
+                                .toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate().
+                                until(LocalDate.now(), ChronoUnit.YEARS)
+                        : 0);
         container.addGeneratedProperty("details", new DetailsGenerator());
-        container.addGeneratedProperty("zodiac", String.class, person -> Zodiac.is(person.getBirthDay()));
         legacyApiGrid.setContainerDataSource(container);
         legacyApiGrid.getColumn("details").setHeaderCaption("Details");
         legacyApiGrid.setSizeFull();
