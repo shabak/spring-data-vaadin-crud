@@ -74,7 +74,7 @@ public class MainUI extends UI {
         );
 
         GeneratedPropertyListContainer<Person> container = new
-                GeneratedPropertyListContainer(Person.class, "id", "name", "email", "zodiac", "details");
+                GeneratedPropertyListContainer(Person.class, "id", "name", "email", "zodiac", "age", "details");
         container.addGeneratedProperty("zodiac", person -> Zodiac.is(person.getBirthDay()));
         container.addGeneratedProperty("age", Long.class,
                 p -> p.getBirthDay() != null ?
